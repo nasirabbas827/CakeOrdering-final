@@ -43,6 +43,14 @@ if (isset($_GET['delete_id'])) {
 
 <div class="container mt-4">
     <h3>All Cakes</h3>
+
+    <!-- Search Form -->
+    <form method="GET" class="form-inline mb-3">
+        <input type="text" name="search" class="form-control mr-2" placeholder="Search by ID, Name or Category" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="view_cakes.php" class="btn btn-secondary ml-2">Reset</a>
+    </form>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
             <thead>
@@ -59,10 +67,24 @@ if (isset($_GET['delete_id'])) {
             </thead>
             <tbody>
                 <?php
-                $query = "SELECT c.*, cat.name AS category_name FROM cakes c LEFT JOIN categories cat ON c.category_id = cat.id ORDER BY c.cake_id DESC";
+                $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+
+                $query = "SELECT c.*, cat.name AS category_name 
+                          FROM cakes c 
+                          LEFT JOIN categories cat ON c.category_id = cat.id";
+
+                if (!empty($search)) {
+                    $query .= " WHERE 
+                        c.cake_id LIKE '%$search%' 
+                        OR c.name LIKE '%$search%' 
+                        OR cat.name LIKE '%$search%'";
+                }
+
+                $query .= " ORDER BY c.cake_id DESC";
+
                 $result = $conn->query($query);
 
-                if ($result->num_rows > 0) {
+                if ($result && $result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>
                             <td>{$row['cake_id']}</td>

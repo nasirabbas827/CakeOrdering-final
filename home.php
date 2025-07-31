@@ -22,14 +22,14 @@ $stmt->close();
 $filter_category = $_GET['category'] ?? '';
 
 // Fetch categories
-$categories_result = $conn->query("SELECT * FROM categories ORDER BY name ASC"); // Added ORDER BY
+$categories_result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
 
 // Fetch cakes
 if ($filter_category !== '') {
-    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id WHERE categories.id = ? ORDER BY cakes.name ASC"); // Added ORDER BY
+    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id WHERE categories.id = ? ORDER BY cakes.name ASC");
     $cakes_stmt->bind_param("i", $filter_category);
 } else {
-    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id ORDER BY cakes.name ASC"); // Added ORDER BY
+    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id ORDER BY cakes.name ASC");
 }
 $cakes_stmt->execute();
 $cakes_result = $cakes_stmt->get_result();
@@ -43,99 +43,139 @@ $cakes_result = $cakes_stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css"> <style>
-
-        .container.mt-5 {
-            padding-top: 3rem; /* More space at the top */
-            padding-bottom: 3rem; /* More space at the bottom */
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
         }
 
-        h2, h5, label {
+        .container.mt-5 {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+
+        h2, h3, h5, label {
             font-weight: 600;
             color: #212529;
         }
 
         /* Hero section welcome message */
         .welcome-section {
-            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); /* Gradient background */
+            position: relative;
+            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
             color: white;
-            padding: 3rem 2rem;
+            padding: 4rem 2rem;
             border-radius: 12px;
-            margin-bottom: 2.5rem;
+            margin-bottom: 3rem;
             text-align: center;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            height:480px;
+            background-size: cover;
+            background-position: center;
+            color: white;
+
         }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://images.pexels.com/photos/1120970/pexels-photo-1120970.jpeg');
+            background-size: cover;
+            background-position: cover;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .welcome-section .content {
+            position: relative;
+            z-index: 2;
+        }
+
         .welcome-section h2 {
             color: white;
-            font-size: 2.8rem; /* Larger welcome text */
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
             font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
+
         .welcome-section p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.3rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         /* Category Filter Form */
         .form-inline .form-control {
-            border-radius: 8px; /* Rounded input fields */
-            border: 1px solid #ced4da;
-            padding: 0.6rem 1rem;
-            font-size: 1rem;
-        }
-        .form-inline .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
             border-radius: 8px;
-            padding: 0.6rem 1.5rem;
+            border: 1px solid #ced4da;
+            padding: 0.7rem 1.2rem;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        .form-inline .btn-primary {
+            background-color: #ff6f61;
+            border-color: #ff6f61;
+            border-radius: 8px;
+            padding: 0.7rem 2rem;
             font-weight: 500;
             transition: background-color 0.2s ease, transform 0.2s ease;
         }
+
         .form-inline .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-            transform: translateY(-2px); /* Slight lift on hover */
+            background-color: #e65b50;
+            border-color: #e65b50;
+            transform: translateY(-2px);
         }
 
         /* Cake Card Styling */
         .card {
-            border: none; /* Remove default border */
-            border-radius: 12px; /* More rounded corners for cards */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Softer, subtle shadow */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth hover effect */
-            overflow: hidden; /* Ensures rounded corners */
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            overflow: hidden;
         }
 
         .card:hover {
-            transform: translateY(-5px); /* Slight lift on hover */
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
         }
 
         .card-img-top {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
             object-fit: cover;
-            height: 220px; /* Slightly taller images */
+            height: 250px;
             width: 100%;
         }
 
         .card-body {
-            padding: 1.5rem;
+            padding: 1.75rem;
             background-color: #ffffff;
         }
 
         .card-title {
-            font-size: 1.4rem;
-            margin-bottom: 0.75rem;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
             color: #333;
         }
 
         .card-text {
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.6;
             color: #555;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
+
         .card-text strong {
             color: #212529;
         }
@@ -143,7 +183,7 @@ $cakes_result = $cakes_stmt->get_result();
         .card-footer {
             background-color: #fdfdfd;
             border-top: 1px solid #eee;
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 1.75rem;
             text-align: center;
         }
 
@@ -152,51 +192,79 @@ $cakes_result = $cakes_stmt->get_result();
             background-color: #28a745;
             border-color: #28a745;
             border-radius: 8px;
-            padding: 0.6rem 1.5rem;
+            padding: 0.7rem 2rem;
             font-weight: 500;
             transition: background-color 0.2s ease, transform 0.2s ease;
         }
+
         .btn-success:hover {
             background-color: #218838;
             border-color: #1e7e34;
             transform: translateY(-2px);
         }
+
         .btn-secondary {
             border-radius: 8px;
-            padding: 0.6rem 1.5rem;
+            padding: 0.7rem 2rem;
             font-weight: 500;
         }
 
         /* No cakes message */
         .no-cakes-message {
             text-align: center;
-            padding: 4rem 0;
-            font-size: 1.2rem;
+            padding: 5rem 0;
+            font-size: 1.3rem;
             color: #6c757d;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .welcome-section h2 {
+                font-size: 2.2rem;
+            }
+
+            .welcome-section p {
+                font-size: 1.1rem;
+            }
+
+            .form-inline .form-control {
+                min-width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            .form-inline .btn-primary {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-<?php include('navbar.php'); // Your existing navbar include ?>
+<?php include('navbar.php'); ?>
 
-<div class="container mt-5">
     <div class="welcome-section">
-        <h2>Welcome, <?php echo htmlspecialchars($username); ?>!</h2>
-        <p>Explore our delightful collection of cakes and make your day sweeter.</p>
+        <div class="content">
+            <h2>Welcome, <?php echo htmlspecialchars($username); ?>!</h2>
+            <p>Indulge in our exquisite collection of handcrafted cakes, perfect for every occasion.</p>
+        </div>
     </div>
+<div class="container">
 
-        <h3>
-        Filter Cakes By Category
-
-    </h3>
-
+    <h3>Filter Cakes By Category</h3>
     <div class="d-flex justify-content-center mb-4">
         <form method="GET" class="form-inline">
             <label for="categoryFilter" class="mr-3 text-nowrap">Filter by Category:</label>
-            <select name="category" id="categoryFilter" class="form-control mr-3">
-                <option value="">All Categories</option>
+            <select 
+    style=" width: 250px; height: 45px; padding: 10px; font-size: 16px;" 
+    name="category" 
+    id="categoryFilter" 
+    class="form-control mr-3"
+>
+                <option  value="">All Categories</option>
                 <?php while ($cat = $categories_result->fetch_assoc()): ?>
-                    <option value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
+                    <option   value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
                         <?= htmlspecialchars($cat['name']) ?>
                     </option>
                 <?php endwhile; ?>
@@ -205,11 +273,7 @@ $cakes_result = $cakes_stmt->get_result();
         </form>
     </div>
 
-        <h3>
-        All Available Cakes
-
-    </h3>
-
+    <h3>All Available Cakes</h3>
     <div class="row">
         <?php
         if ($cakes_result->num_rows > 0):
