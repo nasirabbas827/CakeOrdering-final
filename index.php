@@ -1,21 +1,25 @@
 <?php
 include('config.php');
 
-
-
 // Handle category filter
 $filter_category = $_GET['category'] ?? '';
 
-// Fetch categories
-$categories_result = $conn->query("SELECT * FROM categories ORDER BY name ASC"); // Added ORDER BY
+// Fetch categories for the filter
+$categories_result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
 
-// Fetch cakes
+// Fetch cakes with their category names
+$query = "SELECT cakes.*, categories.name AS category_name 
+          FROM cakes 
+          JOIN categories ON cakes.category_id = categories.id";
+
 if ($filter_category !== '') {
-    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id WHERE categories.id = ? ORDER BY cakes.name ASC"); // Added ORDER BY
+    $query .= " WHERE categories.id = ?";
+    $cakes_stmt = $conn->prepare($query . " ORDER BY cakes.name ASC");
     $cakes_stmt->bind_param("i", $filter_category);
 } else {
-    $cakes_stmt = $conn->prepare("SELECT cakes.*, categories.name AS category_name FROM cakes JOIN categories ON cakes.category_id = categories.id ORDER BY cakes.name ASC"); // Added ORDER BY
+    $cakes_stmt = $conn->prepare($query . " ORDER BY cakes.name ASC");
 }
+
 $cakes_stmt->execute();
 $cakes_result = $cakes_stmt->get_result();
 ?>
@@ -25,482 +29,249 @@ $cakes_result = $cakes_stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cake Ordering System</title>
-     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css"> <style>
-
+    <title>Boutique Bakery | Handcrafted Delights</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
         :root {
-            --primary-color: #ff6b6b;
-            --secondary-color: #ff8e8e;
-            --dark-color: #333;
-            --light-color: #f8f9fa;
+            --gold: #d4a373;
+            --dark: #1a1a1a;
+            --cream: #faf9f6;
+            --soft-text: #666;
         }
 
-        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--cream);
+            color: var(--dark);
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .playfair { font-family: 'Playfair Display', serif; }
+
+        /* --- Hero Section --- */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1350&q=80');
             background-size: cover;
             background-position: center;
+            height: 80vh;
+            display: flex;
+            align-items: center;
             color: white;
-            padding: 120px 0;
             text-align: center;
+            clip-path: ellipse(150% 100% at 50% 0%);
         }
+
+        .hero-title { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
         
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .feature-box {
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-            transition: transform 0.3s;
-            background-color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-box:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        
-        .container.mt-5 {
-            padding-top: 3rem; /* More space at the top */
-            padding-bottom: 3rem; /* More space at the bottom */
-        }
-
-        h2, h5, label {
-            font-weight: 600;
-            color: #212529;
-        }
-
-        /* Hero section welcome message */
-        .welcome-section {
-            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%); /* Gradient background */
-            color: white;
-            padding: 3rem 2rem;
-            border-radius: 12px;
-            margin-bottom: 2.5rem;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-        .welcome-section h2 {
-            color: white;
-            font-size: 2.8rem; /* Larger welcome text */
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        .welcome-section p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        /* Category Filter Form */
-        .form-inline .form-control {
-            border-radius: 8px; /* Rounded input fields */
-            border: 1px solid #ced4da;
-            padding: 0.6rem 1rem;
-            font-size: 1rem;
-        }
-        .form-inline .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .form-inline .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-            transform: translateY(-2px); /* Slight lift on hover */
-        }
-
-        /* Cake Card Styling */
-        .card {
-            border: none; /* Remove default border */
-            border-radius: 12px; /* More rounded corners for cards */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Softer, subtle shadow */
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth hover effect */
-            overflow: hidden; /* Ensures rounded corners */
-        }
-
-        .card:hover {
-            transform: translateY(-5px); /* Slight lift on hover */
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
-        }
-
-        .card-img-top {
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            object-fit: cover;
-            height: 220px; /* Slightly taller images */
-            width: 100%;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-            background-color: #ffffff;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            margin-bottom: 0.75rem;
-            color: #333;
-        }
-
-        .card-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #555;
-            margin-bottom: 0.5rem;
-        }
-        .card-text strong {
-            color: #212529;
-        }
-
-        .card-footer {
-            background-color: #fdfdfd;
-            border-top: 1px solid #eee;
-            padding: 1rem 1.5rem;
-            text-align: center;
-        }
-
-        /* Button styling inside cards */
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 500;
-        }
-
-        /* No cakes message */
-        .no-cakes-message {
-            text-align: center;
-            padding: 4rem 0;
-            font-size: 1.2rem;
-            color: #6c757d;
-        }
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 50px;
-            color: var(--dark-color);
+        /* --- Filters --- */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-top: -40px;
             position: relative;
-            display: inline-block;
+            z-index: 10;
         }
-        
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 4px;
-            background-color: var(--primary-color);
-            bottom: -10px;
-            left: 25%;
-        }
-        
+
+        /* --- Cake Cards --- */
         .cake-card {
             border: none;
-            border-radius: 10px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-            margin-bottom: 30px;
+            background: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
-        
+
         .cake-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
-        
+
         .cake-img {
-            height: 200px;
+            height: 250px;
             object-fit: cover;
+            transition: transform 0.5s;
         }
-        
-        .cake-title {
+
+        .cake-card:hover .cake-img { transform: scale(1.1); }
+
+        .price-tag {
+            font-size: 1.25rem;
             font-weight: 700;
-            color: var(--dark-color);
+            color: var(--gold);
         }
-        
-        .cake-price {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.2rem;
+
+        .category-badge {
+            background: #f0e6db;
+            color: #8d6e63;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: 50px;
         }
-        
-        footer {
-            background-color: var(--dark-color);
+
+        /* --- Custom Section --- */
+        .custom-banner {
+            background: var(--dark);
             color: white;
-            padding: 30px 0;
+            border-radius: 30px;
+            padding: 60px;
+            overflow: hidden;
         }
-        
-        .social-icons a {
+
+        .btn-gold {
+            background: var(--gold);
             color: white;
-            font-size: 1.5rem;
-            margin: 0 10px;
-            transition: color 0.3s;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
         }
-        
-        .social-icons a:hover {
-            color: var(--primary-color);
+
+        .btn-gold:hover {
+            background: #bc8a5f;
+            color: white;
+            transform: scale(1.05);
         }
+
+        footer { background: var(--dark); color: rgba(255,255,255,0.6); }
     </style>
 </head>
 <body>
-<?php include('navbar.php'); // Your existing navbar include ?>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <h1 class="hero-title">Sweet Delights Await You</h1>
-            <p class="hero-subtitle">Order delicious, handcrafted cakes for any occasion</p>
-           
-            <a href="login.php" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-utensils me-2"></i>Order Now
-            </a>
-        </div>
-    </section>
+<?php include('navbar.php'); ?>
 
-    <!-- Features Section -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center section-title">Why Choose Us</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="feature-icon">
-                            <i class="fas fa-birthday-cake"></i>
-                        </div>
-                        <h3>Wide Variety</h3>
-                        <p>Choose from our extensive collection of cakes for all occasions and tastes.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="feature-icon">
-                            <i class="fas fa-paint-brush"></i>
-                        </div>
-                        <h3>Custom Designs</h3>
-                        <p>Personalize your cake with our custom design options to make it truly special.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="feature-icon">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <h3>Fast Delivery</h3>
-                        <p>Fresh cakes delivered to your doorstep with our reliable delivery service.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-<div class="container mt-5">
-    <h3>Filter Cakes By Category</h3>
-
-    <div class="d-flex justify-content-center mb-4">
-        <form method="GET" class="form-inline">
-            <label for="categoryFilter" class="mr-3 text-nowrap">Filter by Category:</label>
-            <select name="category" id="categoryFilter" class="form-control mr-3">
-                <option value="">All Categories</option>
-                <?php while ($cat = $categories_result->fetch_assoc()): ?>
-                    <option value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($cat['name']) ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-        </form>
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Handcrafted Moments</h1>
+        <p class="lead mb-4">Baked with obsession, delivered with love.</p>
+        <a href="#menu" class="btn btn-gold btn-lg">Explore the Collection</a>
     </div>
-    <h3>
-        All Available Cakes
+</section>
 
-    </h3>
-
-    <div class="row">
-        <?php
-        if ($cakes_result->num_rows > 0):
-            while ($cake = $cakes_result->fetch_assoc()):
-        ?>
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                <div class="card h-100">
-                    <img src="admin/<?= htmlspecialchars($cake['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($cake['name']) ?>">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title"><?= htmlspecialchars($cake['name']) ?></h5>
-                        <p class="card-text text-muted mb-2"><small><?= htmlspecialchars($cake['description']) ?></small></p>
-                        <p class="card-text mb-1"><strong>Category:</strong> <span class="badge badge-info"><?= htmlspecialchars($cake['category_name']) ?></span></p>
-                        <p class="card-text mb-auto"><strong>Price:</strong> Rs. <?= number_format($cake['price'], 2) ?></p>
+<div class="container" id="menu">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="filter-section">
+                <form method="GET" class="row align-items-center">
+                    <div class="col-md-8 mb-2 mb-md-0">
+                        <select name="category" class="form-control border-0 bg-transparent shadow-none" style="font-weight: 600;">
+                            <option value="">All Masterpieces</option>
+                            <?php while ($cat = $categories_result->fetch_assoc()): ?>
+                                <option value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
                     </div>
-                    <div class="card-footer">
-                        <?php if ($cake['is_available']): ?>
-                            <form action="add_to_cart.php" method="POST">
-                                <input type="hidden" name="cake_id" value="<?= $cake['cake_id'] ?>">
-                                <button type="submit" class="btn btn-success btn-block">Add to Cart</button>
-                            </form>
-                        <?php else: ?>
-                            <button class="btn btn-secondary btn-block" disabled>Not Available</button>
-                        <?php endif; ?>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-gold btn-block">Filter Menu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <?php if ($cakes_result->num_rows > 0): ?>
+            <?php while ($cake = $cakes_result->fetch_assoc()): ?>
+                <div class="col-lg-4 col-md-6 mb-5">
+                    <div class="cake-card h-100">
+                        <div class="overflow-hidden">
+                            <img src="admin/<?= htmlspecialchars($cake['image']) ?>" class="cake-img w-100" alt="<?= htmlspecialchars($cake['name']) ?>">
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="category-badge"><?= htmlspecialchars($cake['category_name']) ?></span>
+                                <span class="price-tag">Rs. <?= number_format($cake['price'], 0) ?></span>
+                            </div>
+                            <h4 class="playfair mb-2"><?= htmlspecialchars($cake['name']) ?></h4>
+                            <p class="text-muted small"><?= htmlspecialchars($cake['description']) ?></p>
+                            
+                            <div class="mt-4">
+                                <?php if ($cake['is_available']): ?>
+                                    <form action="add_to_cart.php" method="POST">
+                                        <input type="hidden" name="cake_id" value="<?= $cake['cake_id'] ?>">
+                                        <button type="submit" class="btn btn-outline-dark btn-block btn-sm rounded-pill py-2">
+                                            <i class="fas fa-shopping-basket mr-2"></i>Add to Cart
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <button class="btn btn-light btn-block btn-sm rounded-pill disabled" disabled>Sold Out</button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="col-12 text-center py-5">
+                <p class="lead text-muted">We're currently perfecting those recipes. Try another category!</p>
             </div>
-        <?php
-            endwhile;
-        else:
-        ?>
-        <div class="col-12">
-            <p class="no-cakes-message">No cakes found matching your criteria. Please try a different category.</p>
-        </div>
         <?php endif; ?>
     </div>
 </div>
 
-    <!-- Custom Orders Section -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h2 class="section-title">Custom Cake Orders</h2>
-                    <p>Have a special design in mind? Our talented bakers can create a custom cake just for your occasion. Whether it's a birthday, wedding, or any celebration, we'll work with you to bring your vision to life.</p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Personalized designs</li>
-                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Special ingredients</li>
-                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Unique shapes and sizes</li>
-                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Dietary requirements</li>
-                    </ul>
-                    <a href="custom.php" class="btn btn-primary mt-3">Request Custom Cake</a>
-                </div>
-                <div class="col-md-6">
-                    <img src="https://images.unsplash.com/photo-1535254973040-607b474cb50d?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80" class="img-fluid rounded shadow" alt="Custom Cake">
-                </div>
+<section class="container my-5">
+    <div class="custom-banner shadow-lg">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h2 class="display-4 mb-3">Dreaming of a <br><span style="color:var(--gold)">Unique Design?</span></h2>
+                <p class="lead mb-4 opacity-75">From wedding tiers to whimsical birthday creations, our master bakers translate your imagination into edible art.</p>
+                <a href="custom_requests.php" class="btn btn-gold px-5 py-3">Start Your Consultation</a>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <img src="https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded-circle shadow" style="border: 10px solid rgba(255,255,255,0.1)" alt="Chef at work">
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Testimonials Section -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center section-title">What Our Customers Say</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card p-4 mb-4 shadow-sm">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://randomuser.me/api/portraits/women/32.jpg" class="rounded-circle me-3" width="60" alt="Customer">
-                            <div>
-                                <h5 class="mb-0">Sarah Johnson</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mb-0">"The birthday cake I ordered was absolutely delicious! It arrived on time and looked exactly like the picture. Will definitely order again!"</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card p-4 mb-4 shadow-sm">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://randomuser.me/api/portraits/men/45.jpg" class="rounded-circle me-3" width="60" alt="Customer">
-                            <div>
-                                <h5 class="mb-0">Michael Chen</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mb-0">"The custom cake for our anniversary was stunning! The team really listened to what we wanted and delivered beyond our expectations."</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card p-4 mb-4 shadow-sm">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://randomuser.me/api/portraits/women/68.jpg" class="rounded-circle me-3" width="60" alt="Customer">
-                            <div>
-                                <h5 class="mb-0">Emily Rodriguez</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mb-0">"I've ordered several cakes from here and they never disappoint. The quality is consistently excellent and the customer service is top-notch."</p>
-                    </div>
-                </div>
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="playfair mb-5">Trusted by Cake Lovers</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <i class="fas fa-quote-left mb-3 text-muted"></i>
+                <p class="font-italic">"The chocolate ganache was life-changing. Best bakery in town!"</p>
+                <h6 class="font-weight-bold">- Sarah J.</h6>
+            </div>
+            <div class="col-md-4 mb-4">
+                <i class="fas fa-quote-left mb-3 text-muted"></i>
+                <p class="font-italic">"Ordered a custom wedding cake and it was the highlight of the night."</p>
+                <h6 class="font-weight-bold">- Michael C.</h6>
+            </div>
+            <div class="col-md-4 mb-4">
+                <i class="fas fa-quote-left mb-3 text-muted"></i>
+                <p class="font-italic">"Fast delivery and the packaging was so elegant."</p>
+                <h6 class="font-weight-bold">- Emily R.</h6>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Call to Action -->
-    <section class="py-5 bg-primary text-white">
-        <div class="container text-center">
-            <h2 class="mb-4">Ready to Order Your Perfect Cake?</h2>
-            <p class="lead mb-4">Join thousands of satisfied customers who have made their celebrations sweeter with our cakes.</p>
-            <a href="register.php" class="btn btn-light btn-lg me-3">Sign Up Now</a>
-            <a href="login.php" class="btn btn-outline-light btn-lg">Login</a>
+<footer class="py-5">
+    <div class="container text-center">
+        <h3 class="playfair text-white mb-4">Boutique Bakery</h3>
+        <div class="mb-4">
+            <a href="#" class="text-white mx-3"><i class="fab fa-instagram fa-lg"></i></a>
+            <a href="#" class="text-white mx-3"><i class="fab fa-facebook fa-lg"></i></a>
+            <a href="#" class="text-white mx-3"><i class="fab fa-pinterest fa-lg"></i></a>
         </div>
-    </section>
+        <p class="small">&copy; 2026 Boutique Bakery System. All rights reserved.</p>
+    </div>
+</footer>
 
-    <!-- Footer -->
-    <footer class="py-4 bg-dark text-white">
-            <div class="text-center">
-                <p class="mb-0">&copy; 2025 Cake Ordering System. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

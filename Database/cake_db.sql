@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 23, 2025 at 08:04 AM
+-- Generation Time: Feb 14, 2026 at 08:33 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -61,10 +61,36 @@ CREATE TABLE `cakes` (
 --
 
 INSERT INTO `cakes` (`cake_id`, `name`, `price`, `image`, `description`, `category_id`, `is_available`) VALUES
-(1, 'Cake one', 4000.00, 'uploads/502-2.png', 'new des', 15, 1),
-(2, 'Cake one', 4000.00, 'uploads/1747974254_201_3.png', 'dss', 15, 1),
-(3, 'Cake two', 4000.00, 'uploads/1747974267_201_3.png', 'dss', 13, 1),
-(4, 'Cake thjree', 4000.00, 'uploads/1747974278_201_3.png', 'dss', 14, 1);
+(1, 'Dark Chocolate Cake', 1500.00, 'uploads/cake.jpg', 'Rich dark chocolate cake with creamy frosting.', 1, 1),
+(2, 'Chocolate Truffle Cake', 1800.00, 'uploads/cake.jpg', 'Decadent chocolate truffle layers with ganache.', 1, 1),
+(3, 'Chocolate Fudge Cake', 1600.00, 'uploads/cake.jpg', 'Moist chocolate fudge cake perfect for any occasion.', 1, 1),
+(4, 'Classic Vanilla Cake', 1200.00, 'uploads/cake.jpg', 'Soft and fluffy vanilla cake with buttercream.', 2, 1),
+(5, 'Vanilla Almond Cake', 1400.00, 'uploads/cake.jpg', 'Vanilla cake with almond essence and cream.', 2, 1),
+(6, 'Vanilla Strawberry Cake', 1500.00, 'uploads/cake.jpg', 'Vanilla sponge cake with strawberry filling.', 2, 1),
+(7, 'Mixed Fruit Cake', 2000.00, 'uploads/cake.jpg', 'Loaded with dried fruits and nuts.', 3, 1),
+(8, 'Pineapple Cake', 1800.00, 'uploads/cake.jpg', 'Tangy pineapple layered cake.', 3, 1),
+(9, 'Apple Cinnamon Cake', 1700.00, 'uploads/cake.jpg', 'Apple chunks with cinnamon flavor.', 3, 1),
+(10, 'Classic Cheesecake', 2200.00, 'uploads/cake.jpg', 'Smooth creamy cheesecake with graham crust.', 4, 1),
+(11, 'Blueberry Cheesecake', 2400.00, 'uploads/cake.jpg', 'Cheesecake topped with fresh blueberries.', 4, 1),
+(12, 'Chocolate Cheesecake', 2500.00, 'uploads/cake.jpg', 'Rich chocolate cheesecake with ganache.', 4, 1),
+(13, 'Chocolate Cupcake', 300.00, 'uploads/cake.jpg', 'Mini chocolate cake with frosting.', 5, 1),
+(14, 'Vanilla Cupcake', 280.00, 'uploads/cake.jpg', 'Classic vanilla cupcake with cream.', 5, 1),
+(15, 'Red Velvet Cupcake', 350.00, 'uploads/cake.jpg', 'Soft red velvet with cream cheese frosting.', 5, 1),
+(16, 'Happy Birthday Cake', 2000.00, 'uploads/cake.jpg', 'Perfect birthday cake with colorful decorations.', 6, 1),
+(17, 'Rainbow Birthday Cake', 2500.00, 'uploads/cake.jpg', 'Vibrant multi-layered birthday cake.', 6, 1),
+(18, 'Chocolate Birthday Cake', 2200.00, 'uploads/cake.jpg', 'Chocolate cake with birthday candles.', 6, 1),
+(19, 'Classic Wedding Cake', 5000.00, 'uploads/cake.jpg', 'Elegant multi-tier wedding cake.', 7, 1),
+(20, 'Vanilla Wedding Cake', 5200.00, 'uploads/cake.jpg', 'Vanilla sponge with fondant decoration.', 7, 1),
+(21, 'Chocolate Wedding Cake', 5400.00, 'uploads/cake.jpg', 'Rich chocolate wedding cake for celebrations.', 7, 1),
+(22, 'Chocolate Ice Cream Cake', 1800.00, 'uploads/cake.jpg', 'Chocolate cake with ice cream layers.', 8, 1),
+(23, 'Vanilla Ice Cream Cake', 1700.00, 'uploads/cake.jpg', 'Vanilla ice cream cake with cream topping.', 8, 1),
+(24, 'Strawberry Ice Cream Cake', 1900.00, 'uploads/cake.jpg', 'Strawberry flavored ice cream cake.', 8, 1),
+(25, 'Eggless Chocolate Cake', 1600.00, 'uploads/cake.jpg', 'Soft chocolate cake without eggs.', 9, 1),
+(26, 'Eggless Vanilla Cake', 1500.00, 'uploads/cake.jpg', 'Fluffy eggless vanilla cake.', 9, 1),
+(27, 'Eggless Fruit Cake', 1700.00, 'uploads/cake.jpg', 'Fruit cake prepared without eggs.', 9, 1),
+(28, 'Red Velvet Cake', 2000.00, 'uploads/cake.jpg', 'Classic red velvet cake with cream cheese frosting.', 10, 1),
+(29, 'Black Forest Cake', 2200.00, 'uploads/cake.jpg', 'Chocolate cake with cherries and cream.', 10, 1),
+(30, 'Tiramisu Cake', 2500.00, 'uploads/cake.jpg', 'Coffee-flavored Italian specialty cake.', 10, 1);
 
 -- --------------------------------------------------------
 
@@ -96,9 +122,16 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
-(13, 'Flowers'),
-(14, 'Income Tax'),
-(15, 'Car');
+(1, 'Chocolate Cakes'),
+(2, 'Vanilla Cakes'),
+(3, 'Fruit Cakes'),
+(4, 'Cheesecakes'),
+(5, 'Cupcakes'),
+(6, 'Birthday Cakes'),
+(7, 'Wedding Cakes'),
+(8, 'Ice Cream Cakes'),
+(9, 'Eggless Cakes'),
+(10, 'Specialty Cakes');
 
 -- --------------------------------------------------------
 
@@ -120,7 +153,7 @@ CREATE TABLE `custom_requests` (
 --
 
 INSERT INTO `custom_requests` (`request_id`, `user_id`, `design_details`, `status`, `admin_feedback`, `created_at`) VALUES
-(1, 3, 'kdfae', 'accepted', 'daeadsf', '2025-05-23 05:14:44');
+(1, 3, 'XYZ', 'accepted', 'Okay', '2026-02-14 07:31:04');
 
 -- --------------------------------------------------------
 
@@ -136,37 +169,6 @@ CREATE TABLE `expenses` (
   `expense_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `expenses`
---
-
-INSERT INTO `expenses` (`expense_id`, `expense_type`, `amount`, `description`, `expense_date`, `created_at`) VALUES
-(1, 'ds', 3800.00, 'dfa', '2025-05-23', '2025-05-23 05:22:59'),
-(2, 'dsfdad', 3000.00, 'dfa', '2025-05-14', '2025-05-23 05:23:10');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `messages`
---
-
-CREATE TABLE `messages` (
-  `id` int(11) NOT NULL,
-  `sender_id` int(11) NOT NULL,
-  `receiver_id` int(11) NOT NULL,
-  `message_text` text DEFAULT NULL,
-  `sent_datetime` datetime DEFAULT current_timestamp(),
-  `reply_text` text DEFAULT NULL,
-  `reply_datetime` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `messages`
---
-
-INSERT INTO `messages` (`id`, `sender_id`, `receiver_id`, `message_text`, `sent_datetime`, `reply_text`, `reply_datetime`) VALUES
-(4, 3, 0, 'fdae', '2025-05-23 10:30:16', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -192,8 +194,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `estimated_time`, `payment_status`, `name`, `address`, `phone`, `created_at`) VALUES
-(1, 3, 28000.00, 'dispatched', '50 minutes', 'paid', 'Haider', 'P/o Basti Chhina Tehsil jampur District Rajanpur\r\nP/o Basti Chhina Tehsil jampur District Rajanpur', '03120558090', '2025-05-23 04:40:41'),
-(2, 3, 4000.00, 'processing', '45-60 minutes', 'unpaid', 'nasir', 'ds', '03120558064', '2025-05-23 05:40:27');
+(1, 3, 1800.00, 'processing', '45-60 minutes', 'unpaid', 'NASIR ABBAS', 'P/o Basti Chhina Tehsil jampur District Rajanpur\r\nP/o Basti Chhina Tehsil jampur District Rajanpur', '9853', '2026-02-14 07:28:08');
 
 -- --------------------------------------------------------
 
@@ -214,9 +215,7 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`order_item_id`, `order_id`, `cake_id`, `quantity`, `price`) VALUES
-(1, 1, 1, 4, 4000.00),
-(2, 1, 3, 3, 4000.00),
-(3, 2, 2, 1, 4000.00);
+(1, 1, 2, 1, 1800.00);
 
 -- --------------------------------------------------------
 
@@ -231,14 +230,6 @@ CREATE TABLE `payment_vouchers` (
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `verified` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `payment_vouchers`
---
-
-INSERT INTO `payment_vouchers` (`voucher_id`, `order_id`, `image_path`, `uploaded_at`, `verified`) VALUES
-(1, 1, 'vouchers/1747975848_addpet.png', '2025-05-23 04:50:48', 1),
-(2, 1, 'vouchers/1747976469_504-2.png', '2025-05-23 05:01:09', 0);
 
 -- --------------------------------------------------------
 
@@ -309,12 +300,6 @@ ALTER TABLE `expenses`
   ADD PRIMARY KEY (`expense_id`);
 
 --
--- Indexes for table `messages`
---
-ALTER TABLE `messages`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
@@ -356,19 +341,19 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `cakes`
 --
 ALTER TABLE `cakes`
-  MODIFY `cake_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `cake_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `custom_requests`
@@ -380,31 +365,25 @@ ALTER TABLE `custom_requests`
 -- AUTO_INCREMENT for table `expenses`
 --
 ALTER TABLE `expenses`
-  MODIFY `expense_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `messages`
---
-ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `expense_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `payment_vouchers`
 --
 ALTER TABLE `payment_vouchers`
-  MODIFY `voucher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `voucher_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`

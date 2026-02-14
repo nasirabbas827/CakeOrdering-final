@@ -28,13 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_payment'])) {
     $verified = intval($_POST['verified']);
     $order_id = intval($_POST['order_id']);
 
-    // Update verification status
     $stmt = $conn->prepare("UPDATE payment_vouchers SET verified = ? WHERE voucher_id = ?");
     $stmt->bind_param("ii", $verified, $voucher_id);
     $stmt->execute();
     $stmt->close();
 
-    // Update order payment_status accordingly
     $payment_status = $verified ? 'paid' : 'unpaid';
     $stmt = $conn->prepare("UPDATE Orders SET payment_status = ? WHERE order_id = ?");
     $stmt->bind_param("si", $payment_status, $order_id);
@@ -47,133 +45,222 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_payment'])) {
 
 // Date filter
 $filter = "";
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['start_date']) && isset($_GET['end_date'])) {
-    $start = $_GET['start_date'];
-    $end = $_GET['end_date'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['start_date']) && !empty($_GET['end_date'])) {
+    $start = $conn->real_escape_string($_GET['start_date']);
+    $end = $conn->real_escape_string($_GET['end_date']);
     $filter = "WHERE DATE(created_at) BETWEEN '$start' AND '$end'";
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Manage Orders</title>
+    <meta charset="UTF-8">
+    <title>Manage Orders | Admin</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #d4a373;
+            --accent-color: #faedcd;
+            --text-dark: #2d2d2d;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: var(--text-dark);
+        }
+
+        h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+
+        .service-card {
+            background: #fff;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        /* Order Status Badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-processing { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #cce5ff; color: #004085; }
+        .status-dispatched { background: #e2e3e5; color: #383d41; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        .table thead th {
+            background: var(--accent-color);
+            border: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-update {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-update:hover { background: #bc8a5f; color: white; }
+
+        @media print {
+            .navbar, .btn, .filter-section { display: none !important; }
+            .service-card { box-shadow: none; border: 1px solid #eee; }
+        }
+    </style>
 </head>
 <body>
+
 <?php include('admin_navbar.php'); ?>
 
-<div class="container mt-4">
-    <h3>Manage Customer Orders</h3>
+<div class="container-fluid mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h3>Manage Customer Orders</h3>
+        </div>
+        <div class="col-md-6 text-md-right filter-section">
+            <form class="form-inline d-inline-block" method="GET">
+                <input type="date" name="start_date" class="form-control form-control-sm mr-2" required>
+                <input type="date" name="end_date" class="form-control form-control-sm mr-2" required>
+                <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+                <a href="admin_orders.php" class="btn btn-sm btn-outline-secondary">Reset</a>
+            </form>
+            <button onclick="window.print();" class="btn btn-sm btn-dark ml-2">Print Log</button>
+        </div>
+    </div>
 
-    <form class="form-inline mb-3" method="GET" action="admin_orders.php">
-        <label for="start_date" class="mr-2">From:</label>
-        <input type="date" name="start_date" class="form-control mr-3" required>
-        <label for="end_date" class="mr-2">To:</label>
-        <input type="date" name="end_date" class="form-control mr-3" required>
-        <button type="submit" class="btn btn-primary">Filter</button>
-        <button type="button" onclick="window.print();" class="btn btn-secondary ml-2">Print Orders</button>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer Info</th>
-                    <th>Amount</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                    <th>Estimated Time</th>
-                    <th>Created</th>
-                    <th>Update</th>
-                    <th>Voucher</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $orders = $conn->query("SELECT * FROM Orders $filter ORDER BY created_at DESC");
-                if ($orders->num_rows > 0) {
-                    while ($row = $orders->fetch_assoc()) {
-                        echo "<tr>
-                            <td>#{$row['order_id']}</td>
-                            <td><strong>Name:</strong> " . htmlspecialchars($row['name']) . "</td>
-                            <td>Rs. {$row['total_amount']}</td>
-                            <td>" . ucfirst($row['payment_status']) . "</td>
-                            <td>
-                                <form method='POST' class='form-inline'>
-                                    <input type='hidden' name='order_id' value='{$row['order_id']}'>
-                                    <select name='status' class='form-control form-control-sm mr-2'>
-                                        <option " . ($row['status'] == 'processing' ? 'selected' : '') . ">processing</option>
-                                        <option " . ($row['status'] == 'confirmed' ? 'selected' : '') . ">confirmed</option>
-                                        <option " . ($row['status'] == 'dispatched' ? 'selected' : '') . ">dispatched</option>
-                                        <option " . ($row['status'] == 'delivered' ? 'selected' : '') . ">delivered</option>
-                                        <option " . ($row['status'] == 'rejected' ? 'selected' : '') . ">rejected</option>
-                                    </select>
-                            </td>
-                            <td>
-                                    <input type='text' name='estimated_time' class='form-control form-control-sm' value='" . htmlspecialchars($row['estimated_time']) . "'>
-                            </td>
-                            <td>{$row['created_at']}</td>
-                            <td>
-                                    <button type='submit' name='update_order' class='btn btn-sm btn-primary'>Update</button>
-                                </form>
-                                <form method='GET' action='order_details.php' class='mt-2'>
-                                    <input type='hidden' name='order_id' value='{$row['order_id']}'>
-                                    <button type='submit' class='btn btn-sm btn-outline-info'>View Details</button>
-                                </form>
-                            </td>
-                            <td>";
-
-                        $oid = $row['order_id'];
-                        $vResult = $conn->query("SELECT * FROM payment_vouchers WHERE order_id = $oid");
-                        if ($vResult && $vResult->num_rows > 0) {
-                            $voucher = $vResult->fetch_assoc();
-                            echo "
-                            <button class='btn btn-sm btn-info' data-toggle='modal' data-target='#voucherModal$oid'>View</button>
-
-                            <div class='modal fade' id='voucherModal$oid' tabindex='-1' role='dialog'>
-                              <div class='modal-dialog modal-dialog-centered' role='document'>
-                                <div class='modal-content'>
-                                  <div class='modal-header'>
-                                    <h5 class='modal-title'>Payment Voucher - Order #$oid</h5>
-                                    <button type='button' class='close' data-dismiss='modal'>&times;</button>
-                                  </div>
-                                  <div class='modal-body text-center'>
-                                    <img src='../{$voucher['image_path']}' class='img-fluid mb-3' alt='Voucher Image'>
-                                    <form method='POST'>
-                                        <input type='hidden' name='voucher_id' value='{$voucher['voucher_id']}'>
-                                        <input type='hidden' name='order_id' value='$oid'>
-                                        <div class='form-group'>
-                                            <select name='verified' class='form-control'>
-                                                <option value='1' " . ($voucher['verified'] ? 'selected' : '') . ">Verified</option>
-                                                <option value='0' " . (!$voucher['verified'] ? 'selected' : '') . ">Not Verified</option>
-                                            </select>
-                                        </div>
-                                        <button type='submit' name='verify_payment' class='btn btn-success'>Update Verification</button>
+    <div class="service-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Current Status</th>
+                        <th>ETC</th>
+                        <th>Verification</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $orders = $conn->query("SELECT * FROM Orders $filter ORDER BY created_at DESC");
+                    if ($orders->num_rows > 0) {
+                        while ($row = $orders->fetch_assoc()) {
+                            $oid = $row['order_id'];
+                            $status_class = "status-" . $row['status'];
+                            ?>
+                            <tr>
+                                <td>
+                                    <span class="font-weight-bold text-primary">#<?= $oid ?></span><br>
+                                    <small class="text-muted"><?= date('M d, H:i', strtotime($row['created_at'])) ?></small>
+                                </td>
+                                <td>
+                                    <strong><?= htmlspecialchars($row['name']) ?></strong>
+                                </td>
+                                <td class="font-weight-bold">Rs. <?= number_format($row['total_amount'], 2) ?></td>
+                                <td>
+                                    <span class="badge badge-pill <?= $row['payment_status'] == 'paid' ? 'badge-success' : 'badge-danger' ?>">
+                                        <?= ucfirst($row['payment_status']) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <form method='POST' id='form<?= $oid ?>'>
+                                        <input type='hidden' name='order_id' value='<?= $oid ?>'>
+                                        <select name='status' class="form-control form-control-sm border-0 <?= $status_class ?>" onchange="this.className='form-control form-control-sm border-0 status-'+this.value">
+                                            <?php 
+                                            $opts = ['processing', 'confirmed', 'dispatched', 'delivered', 'rejected'];
+                                            foreach($opts as $opt) {
+                                                $sel = ($row['status'] == $opt) ? 'selected' : '';
+                                                echo "<option value='$opt' $sel>$opt</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                </td>
+                                <td>
+                                    <input type='text' name='estimated_time' class='form-control form-control-sm' value='<?= htmlspecialchars($row['estimated_time']) ?>' placeholder="e.g. 2 Hours">
+                                </td>
+                                <td>
+                                    <?php
+                                    $vResult = $conn->query("SELECT * FROM payment_vouchers WHERE order_id = $oid");
+                                    if ($vResult && $vResult->num_rows > 0) {
+                                        $voucher = $vResult->fetch_assoc();
+                                        $vColor = $voucher['verified'] ? 'btn-success' : 'btn-info';
+                                        echo "<button type='button' class='btn btn-xs $vColor' style='font-size:11px' data-toggle='modal' data-target='#voucherModal$oid'>
+                                                " . ($voucher['verified'] ? 'Verified' : 'View Voucher') . "
+                                              </button>";
+                                    } else {
+                                        echo "<span class='text-muted small italic'>No Voucher</span>";
+                                    }
+                                    ?>
+                                </td>
+                                <td class="text-right">
+                                    <button type='submit' name='update_order' class='btn btn-sm btn-update mb-1'>Update</button>
                                     </form>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>";
-                        } else {
-                            echo "<span class='text-muted'>No Voucher</span>";
-                        }
+                                    <form method='GET' action='order_details.php'>
+                                        <input type='hidden' name='order_id' value='<?= $oid ?>'>
+                                        <button type='submit' class='btn btn-xs btn-link text-info p-0' style="font-size: 12px;">Order Items →</button>
+                                    </form>
+                                </td>
+                            </tr>
 
-                        echo "</td></tr>";
+                            <?php if ($vResult && $vResult->num_rows > 0): ?>
+                            <div class='modal fade' id='voucherModal<?= $oid ?>' tabindex='-1' role='dialog'>
+                                <div class='modal-dialog modal-dialog-centered'>
+                                    <div class='modal-content border-0 shadow-lg'>
+                                        <div class='modal-header bg-light'>
+                                            <h5 class='modal-title'>Payment Check - #<?= $oid ?></h5>
+                                            <button type='button' class='close' data-dismiss='modal'>&times;</button>
+                                        </div>
+                                        <div class='modal-body text-center'>
+                                            <div class="mb-3 rounded overflow-hidden shadow-sm">
+                                                <img src='../<?= $voucher['image_path'] ?>' class='img-fluid' alt='Voucher'>
+                                            </div>
+                                            <form method='POST' class="bg-light p-3 rounded">
+                                                <input type='hidden' name='voucher_id' value='<?= $voucher['voucher_id'] ?>'>
+                                                <input type='hidden' name='order_id' value='<?= $oid ?>'>
+                                                <label class="small font-weight-bold text-muted d-block text-left mb-2">VERIFY PAYMENT</label>
+                                                <select name='verified' class='form-control mb-3'>
+                                                    <option value='1' <?= $voucher['verified'] ? 'selected' : '' ?>>Verify & Mark Paid</option>
+                                                    <option value='0' <?= !$voucher['verified'] ? 'selected' : '' ?>>Unverified / Pending</option>
+                                                </select>
+                                                <button type='submit' name='verify_payment' class='btn btn-primary btn-block'>Update Verification</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                            <?php
+                        }
+                    } else {
+                        echo "<tr><td colspan='8' class='text-center py-5'>No orders found.</td></tr>";
                     }
-                } else {
-                    echo "<tr><td colspan='9' class='text-center'>No orders found.</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>

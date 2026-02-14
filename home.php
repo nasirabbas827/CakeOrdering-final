@@ -38,278 +38,233 @@ $cakes_result = $cakes_stmt->get_result();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Home Page - Cake Shop</title>
+    <title>Boutique Bakery | Handcrafted Cakes</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --gold: #d4a373;
+            --dark: #1a1a1a;
+            --cream: #faf9f6;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--cream);
+            color: #444;
         }
 
-        .container.mt-5 {
-            padding-top: 4rem;
-            padding-bottom: 4rem;
-        }
-
-        h2, h3, h5, label {
-            font-weight: 600;
-            color: #212529;
-        }
-
-        /* Hero section welcome message */
+        /* Luxury Hero Section */
         .welcome-section {
             position: relative;
-            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            padding: 4rem 2rem;
-            border-radius: 12px;
-            margin-bottom: 3rem;
+            background: var(--dark);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            height:480px;
-            background-size: cover;
-            background-position: center;
             color: white;
-
+            margin-bottom: 50px;
+            overflow: hidden;
         }
 
-        .welcome-section::before {
+        .welcome-section::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('https://images.pexels.com/photos/1120970/pexels-photo-1120970.jpeg');
-            background-size: cover;
-            background-position: cover;
-            opacity: 0.3;
-            z-index: 1;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://images.pexels.com/photos/1120970/pexels-photo-1120970.jpeg') center/cover;
+            opacity: 0.4;
         }
 
         .welcome-section .content {
             position: relative;
             z-index: 2;
+            padding: 20px;
         }
 
         .welcome-section h2 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 0.75rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
         }
 
         .welcome-section p {
-            font-size: 1.3rem;
-            opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Category Filter Form */
-        .form-inline .form-control {
-            border-radius: 8px;
-            border: 1px solid #ced4da;
-            padding: 0.7rem 1.2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             font-size: 1rem;
-            min-width: 200px;
         }
 
-        .form-inline .btn-primary {
-            background-color: #ff6f61;
-            border-color: #ff6f61;
-            border-radius: 8px;
-            padding: 0.7rem 2rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+        /* Filter Styling */
+        .filter-wrapper {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            margin-top: -80px;
+            position: relative;
+            z-index: 10;
         }
 
-        .form-inline .btn-primary:hover {
-            background-color: #e65b50;
-            border-color: #e65b50;
-            transform: translateY(-2px);
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: var(--dark);
         }
 
-        /* Cake Card Styling */
+        /* Product Card Styling */
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            overflow: hidden;
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            background: white;
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1);
         }
 
         .card-img-top {
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            height: 280px;
             object-fit: cover;
-            height: 250px;
-            width: 100%;
+            border-radius: 20px 20px 0 0;
         }
 
-        .card-body {
-            padding: 1.75rem;
-            background-color: #ffffff;
+        .badge-category {
+            background: var(--cream);
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 50px;
+            margin-bottom: 10px;
+            display: inline-block;
         }
 
-        .card-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #333;
+        .cake-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--dark);
         }
 
-        .card-text {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #555;
-            margin-bottom: 0.75rem;
+        .price-tag {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 1.2rem;
         }
 
-        .card-text strong {
-            color: #212529;
-        }
-
-        .card-footer {
-            background-color: #fdfdfd;
-            border-top: 1px solid #eee;
-            padding: 1.25rem 1.75rem;
-            text-align: center;
-        }
-
-        /* Button styling inside cards */
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            border-radius: 8px;
-            padding: 0.7rem 2rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            border-radius: 8px;
-            padding: 0.7rem 2rem;
-            font-weight: 500;
-        }
-
-        /* No cakes message */
-        .no-cakes-message {
-            text-align: center;
-            padding: 5rem 0;
-            font-size: 1.3rem;
-            color: #6c757d;
-            background-color: #fff;
+        .btn-add {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 12px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            font-weight: 600;
+            transition: 0.3s;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .welcome-section h2 {
-                font-size: 2.2rem;
-            }
+        .btn-add:hover {
+            background: var(--gold);
+            color: white;
+        }
 
-            .welcome-section p {
-                font-size: 1.1rem;
-            }
-
-            .form-inline .form-control {
-                min-width: 100%;
-                margin-bottom: 1rem;
-            }
-
-            .form-inline .btn-primary {
-                width: 100%;
-            }
+        .btn-out {
+            border-radius: 12px;
+            padding: 12px;
+            background: #eee;
+            color: #999;
+            border: none;
         }
     </style>
 </head>
 <body>
+
 <?php include('navbar.php'); ?>
 
-    <div class="welcome-section">
-        <div class="content">
-            <h2>Welcome, <?php echo htmlspecialchars($username); ?>!</h2>
-            <p>Indulge in our exquisite collection of handcrafted cakes, perfect for every occasion.</p>
+<div class="welcome-section">
+    <div class="content">
+        <p>Est. 2026</p>
+        <h2>Welcome, <?= htmlspecialchars($username); ?></h2>
+        <p>Your daily dose of sweetness awaits</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="filter-wrapper mb-5">
+                <form method="GET" class="form-row align-items-center justify-content-center">
+                    <div class="col-md-auto mb-2 mb-md-0">
+                        <label class="mr-3 font-weight-bold small text-uppercase">Collection</label>
+                    </div>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <select name="category" class="form-control custom-select border-0 bg-light">
+                            <option value="">All Collections</option>
+                            <?php while ($cat = $categories_result->fetch_assoc()): ?>
+                                <option value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" class="btn btn-dark px-4 font-weight-bold">Filter</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-<div class="container">
 
-    <h3>Filter Cakes By Category</h3>
-    <div class="d-flex justify-content-center mb-4">
-        <form method="GET" class="form-inline">
-            <label for="categoryFilter" class="mr-3 text-nowrap">Filter by Category:</label>
-            <select 
-    style=" width: 250px; height: 45px; padding: 10px; font-size: 16px;" 
-    name="category" 
-    id="categoryFilter" 
-    class="form-control mr-3"
->
-                <option  value="">All Categories</option>
-                <?php while ($cat = $categories_result->fetch_assoc()): ?>
-                    <option   value="<?= $cat['id'] ?>" <?= ($filter_category == $cat['id']) ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($cat['name']) ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-        </form>
-    </div>
+    <h3 class="section-title text-center">Our Signature Cakes</h3>
 
-    <h3>All Available Cakes</h3>
     <div class="row">
-        <?php
-        if ($cakes_result->num_rows > 0):
-            while ($cake = $cakes_result->fetch_assoc()):
-        ?>
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                <div class="card h-100">
-                    <img src="admin/<?= htmlspecialchars($cake['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($cake['name']) ?>">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title"><?= htmlspecialchars($cake['name']) ?></h5>
-                        <p class="card-text text-muted mb-2"><small><?= htmlspecialchars($cake['description']) ?></small></p>
-                        <p class="card-text mb-1"><strong>Category:</strong> <span class="badge badge-info"><?= htmlspecialchars($cake['category_name']) ?></span></p>
-                        <p class="card-text mb-auto"><strong>Price:</strong> Rs. <?= number_format($cake['price'], 2) ?></p>
-                    </div>
-                    <div class="card-footer">
-                        <?php if ($cake['is_available']): ?>
-                            <form action="add_to_cart.php" method="POST">
-                                <input type="hidden" name="cake_id" value="<?= $cake['cake_id'] ?>">
-                                <button type="submit" class="btn btn-success btn-block">Add to Cart</button>
-                            </form>
-                        <?php else: ?>
-                            <button class="btn btn-secondary btn-block" disabled>Not Available</button>
-                        <?php endif; ?>
+        <?php if ($cakes_result->num_rows > 0): ?>
+            <?php while ($cake = $cakes_result->fetch_assoc()): ?>
+                <div class="col-lg-4 col-md-6 mb-5">
+                    <div class="card h-100 shadow-sm">
+                        <img src="admin/<?= htmlspecialchars($cake['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($cake['name']) ?>">
+                        <div class="card-body">
+                            <span class="badge-category"><?= htmlspecialchars($cake['category_name']) ?></span>
+                            <h5 class="cake-name"><?= htmlspecialchars($cake['name']) ?></h5>
+                            <p class="small text-muted mb-4"><?= htmlspecialchars($cake['description']) ?></p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="price-tag">Rs. <?= number_format($cake['price'], 2) ?></span>
+                                <div>
+                                    <?php if ($cake['is_available']): ?>
+                                        <form action="add_to_cart.php" method="POST">
+                                            <input type="hidden" name="cake_id" value="<?= $cake['cake_id'] ?>">
+                                            <button type="submit" class="btn btn-add px-4">Add To Cart</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <button class="btn btn-out px-3" disabled>Sold Out</button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="col-12 text-center py-5">
+                <div class="p-5 bg-white rounded-lg shadow-sm">
+                    <h4 class="text-muted">No cakes found in this collection.</h4>
+                    <a href="home.php" class="btn btn-gold mt-3 text-white">View All Cakes</a>
+                </div>
             </div>
-        <?php
-            endwhile;
-        else:
-        ?>
-        <div class="col-12">
-            <p class="no-cakes-message">No cakes found matching your criteria. Please try a different category.</p>
-        </div>
         <?php endif; ?>
     </div>
 </div>
+
+<footer class="py-5 text-center text-muted">
+    <small>&copy; 2026 Boutique Bakery System</small>
+</footer>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
